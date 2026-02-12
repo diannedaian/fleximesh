@@ -22,6 +22,6 @@ export const config = {
     // Application Configuration
     app: {
         defaultStage: 'loading',
-        debug: false,
+        debug: true, // Set to true for development, false for production
     },
 };

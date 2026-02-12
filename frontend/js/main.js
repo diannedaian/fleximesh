@@ -5,6 +5,7 @@ import { logger } from './utils/logger.js';
 import { config } from './config.js';
 import { PromptInputStage } from './stages/PromptInputStage.js';
 import { GeneratingStage } from './stages/GeneratingStage.js';
+import { DefineBoneJointsStage } from './stages/DefineBoneJointsStage.js';
 
 /**
  * Main application entry point
@@ -36,6 +37,7 @@ class App {
             // Register stages
             this.stageManager.registerStage('prompt-input', PromptInputStage);
             this.stageManager.registerStage('generating', GeneratingStage);
+            this.stageManager.registerStage('define-bone-joints', DefineBoneJointsStage);
 
             // Don't fetch scene data initially - start with empty scene
             // await this.threeScene.fetchSceneData();

@@ -26,7 +26,7 @@ export class PromptInputStage extends BaseStage {
         header.className = 'prompt-header';
         header.innerHTML = `
             <h1 class="text-gradient">Generate 3D Model</h1>
-            <p class="subtitle">Enter text prompt that describes the 3D model you want</p>
+            <p class="subtitle">Instructions: Enter text prompt that describes the 3D model you want to generate</p>
         `;
         this.element.appendChild(header);
 

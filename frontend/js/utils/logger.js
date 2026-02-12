@@ -4,7 +4,11 @@
 class Logger {
     constructor(prefix = 'App') {
         this.prefix = prefix;
-        this.enabled = true; // Can be controlled via config
+        this.enabled = true;
+        // Debug logging can be enabled/disabled
+        // In browser environment, we check for a global flag or use a default
+        this.debugEnabled = typeof window !== 'undefined' &&
+            (window.DEBUG_MODE === true || window.location.hostname === 'localhost');
     }
 
     formatMessage(level, message) {
@@ -31,7 +35,8 @@ class Logger {
     }
 
     debug(message, ...args) {
-        if (this.enabled && process?.env?.NODE_ENV === 'development') {
+        // Browser-safe debug logging (no Node.js process.env)
+        if (this.enabled && this.debugEnabled) {
             console.debug(this.formatMessage('DEBUG', message), ...args);
         }
     }

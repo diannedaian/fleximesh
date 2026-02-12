@@ -53,6 +53,94 @@ body {
     z-index: 1;
 }
 
+/* Download Model Button */
+.download-model-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(22, 22, 26, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.download-model-btn:hover {
+    background: rgba(22, 22, 26, 0.95);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+.download-model-btn:active {
+    transform: translateY(0);
+}
+
+.download-model-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.download-model-btn svg {
+    flex-shrink: 0;
+}
+
+/* Render Mode Buttons Container */
+.render-mode-buttons {
+    position: absolute;
+    top: 1rem;
+    right: 4rem; /* Position to the left of download button */
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Render Mode Button (Normal and Rigging) */
+.render-mode-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(22, 22, 26, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.render-mode-btn:hover {
+    background: rgba(22, 22, 26, 0.95);
+    border-color: var(--accent-color);
+}
+
+.render-mode-btn.active {
+    background: rgba(99, 102, 241, 0.2); /* Accent color with transparency */
+    border-color: var(--accent-color);
+    transform: translateY(2px); /* Pressed down effect */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.render-mode-btn:active:not(.active) {
+    transform: translateY(1px);
+}
+
+.render-mode-btn svg {
+    flex-shrink: 0;
+}
+
 .stage {
     width: 100%;
     height: 100%;
@@ -337,7 +425,7 @@ kbd {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    flex-grow: 1;
     text-align: center;
 }
 
@@ -361,4 +449,28 @@ kbd {
 @keyframes slide {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(250%); }
+}
+
+/* Define Bone Joints Stage Styles */
+.define-bone-joints-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 0;
+}
+
+.instruction-text {
+    width: 100%;
+}
+
+.instruction-paragraph {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-top: 1rem;
+}
+
+.instruction-paragraph strong {
+    color: var(--accent-color);
+    font-weight: 600;
 }
