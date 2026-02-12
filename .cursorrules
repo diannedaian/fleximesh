@@ -1,0 +1,20 @@
+# Project Rules: FastAPI + Vanilla JS + Three.js
+
+## Architecture
+- **Backend**: FastAPI (Python 3.10+). Use Pydantic v2 for schemas.
+- **Frontend**: Vanilla HTML5, CSS3, and JavaScript (ES6 Modules). No React/Vue.
+- **3D Engine**: Three.js (served via CDN or local ES modules).
+- **Directory Structure**:
+    - `/backend`: All Python code.
+    - `/frontend`: All static files (index.html, js/, css/, assets/).
+    - `/assets`: 3D models (.glb, .gltf) and textures.
+
+## Coding Standards
+- **FastAPI**: Use `FastAPI.staticfiles` to serve the `/frontend` directory.
+- **JS**: Use ES6 modules (`import/export`). Avoid global variables.
+- **Three.js**: Prioritize `GLTFLoader` for models. Ensure `requestAnimationFrame` is used for the render loop.
+- **State Management**: Use Pydantic models in the backend to define the "Scene State" and fetch them via the frontend `fetch()` API.
+
+## Error Handling
+- Backend: Use `HTTPException` with clear status codes.
+- Frontend: Use `try/catch` for fetch calls and Three.js loader callbacks.
