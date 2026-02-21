@@ -873,14 +873,18 @@ export class ThreeScene {
             }
         });
 
-        // Show skeleton helpers
+        // Keep default green skeleton overlays hidden; stage-level joint handles are used instead.
+        // this.skeletonHelpers.forEach(helper => {
+        //     helper.visible = true;
+        // });
+        // this.boneVisualizations.forEach(viz => {
+        //     viz.visible = true;
+        // });
         this.skeletonHelpers.forEach(helper => {
-            helper.visible = true;
+            helper.visible = false;
         });
-
-        // Show custom bone visualizations
         this.boneVisualizations.forEach(viz => {
-            viz.visible = true;
+            viz.visible = false;
         });
 
         // Update button states

@@ -9,6 +9,7 @@ class AppState {
         this.sceneData = null;
         this.loadedModels = new Map();
         this.apiObjects = new Map();
+        this.jointAssignments = new Map();
         this.listeners = new Map();
         this.prompt = null; // Store user prompt
     }

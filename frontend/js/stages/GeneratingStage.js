@@ -85,7 +85,7 @@ export class GeneratingStage extends BaseStage {
      *
      * Current behavior:
      * - Waits 5 seconds (simulating generation time)
-     * - Loads a dummy model from /assets/demoforfaraz.glb
+     * - Loads a dummy model from /assets/stickman_human_rigged.glb
      * - Transitions to define-bone-joints stage
      *
      * TODO: Replace with actual implementation:
@@ -112,7 +112,7 @@ export class GeneratingStage extends BaseStage {
                 try {
                     // TODO: Replace with actual generated model path from API
                     // const modelPath = generationResponse.modelUrl;
-                    await this.threeScene.loadModel('/assets/demoforfaraz.glb');
+                    await this.threeScene.loadModel('/assets/stickman_human_rigged.glb');
                     logger.info('Dummy model loaded (placeholder - will be replaced with generated model)');
 
                     // Transition to define bone joints stage
