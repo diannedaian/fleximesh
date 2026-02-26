@@ -2,6 +2,9 @@ import { BaseStage } from './BaseStage.js';
 import { appState } from '../state.js';
 import * as THREE from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 /**
  * DefineBoneJointsStage - Stage for defining bone joints on the 3D model
@@ -26,6 +29,8 @@ export class DefineBoneJointsStage extends BaseStage {
         this.selectedHandleColor = 0x00ff88;
         this._tempWorldPos = new THREE.Vector3();
         this._tempLocalPos = new THREE.Vector3();
+        this._tempParentPos = new THREE.Vector3();
+        this._tempChildPos = new THREE.Vector3();
         this.initSkeletonTools();
         this.startHandleSyncLoop();
     }
@@ -110,7 +115,7 @@ export class DefineBoneJointsStage extends BaseStage {
             this.clearBoneConnections();
         }
 
-        const sphereGeometry = new THREE.SphereGeometry(0.06, 12, 12);
+        const sphereGeometry = new THREE.SphereGeometry(0.035, 12, 12);
         const sphereMaterial = new THREE.MeshBasicMaterial({
             color: this.defaultHandleColor,
             depthTest: true
@@ -161,16 +166,22 @@ export class DefineBoneJointsStage extends BaseStage {
             return;
         }
 
-        const geometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(),
-            new THREE.Vector3()
-        ]);
-        const material = new THREE.LineBasicMaterial({
+        const geometry = new LineGeometry();
+        geometry.setPositions([0, 0, 0, 0, 0, 0]);
+
+        const rendererEl = this.threeScene?.renderer?.domElement;
+        const material = new LineMaterial({
             color: 0x66ffcc,
+            linewidth: 6,
             transparent: true,
             opacity: 0.9
         });
-        const line = new THREE.Line(geometry, material);
+        material.resolution.set(
+            rendererEl?.clientWidth || window.innerWidth,
+            rendererEl?.clientHeight || window.innerHeight
+        );
+
+        const line = new Line2(geometry, material);
         this.connectionGroup.add(line);
         this.boneConnections.push({ parentBone, childBone, line });
         this.updateSingleConnection(parentBone, childBone, line);
@@ -192,14 +203,15 @@ export class DefineBoneJointsStage extends BaseStage {
      * Update one parent-child connection line to current world positions.
      * @param {THREE.Bone} parentBone - Parent bone
      * @param {THREE.Bone} childBone - Child bone
-     * @param {THREE.Line} line - Three.js line object
+     * @param {Line2} line - Three.js wide line object
      */
     updateSingleConnection(parentBone, childBone, line) {
-        const parentPos = new THREE.Vector3();
-        const childPos = new THREE.Vector3();
-        parentBone.getWorldPosition(parentPos);
-        childBone.getWorldPosition(childPos);
-        line.geometry.setFromPoints([parentPos, childPos]);
+        parentBone.getWorldPosition(this._tempParentPos);
+        childBone.getWorldPosition(this._tempChildPos);
+        line.geometry.setPositions([
+            this._tempParentPos.x, this._tempParentPos.y, this._tempParentPos.z,
+            this._tempChildPos.x, this._tempChildPos.y, this._tempChildPos.z
+        ]);
     }
 
     /**
@@ -279,7 +291,13 @@ export class DefineBoneJointsStage extends BaseStage {
             handle.position.copy(this._tempWorldPos);
         });
 
+        const rendererEl = this.threeScene?.renderer?.domElement;
+        const width = rendererEl?.clientWidth || window.innerWidth;
+        const height = rendererEl?.clientHeight || window.innerHeight;
         this.boneConnections.forEach(({ parentBone, childBone, line }) => {
+            if (line.material?.resolution) {
+                line.material.resolution.set(width, height);
+            }
             this.updateSingleConnection(parentBone, childBone, line);
         });
     }
@@ -411,7 +429,7 @@ export class DefineBoneJointsStage extends BaseStage {
      * Continue to the model regeneration stage.
      */
     handleContinue() {
-        appState.setStage('regenerate-model');
+        appState.setStage('automatic-skinning');
     }
 
     /**

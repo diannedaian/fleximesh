@@ -6,6 +6,8 @@ import { config } from './config.js';
 import { PromptInputStage } from './stages/PromptInputStage.js';
 import { GeneratingStage } from './stages/GeneratingStage.js';
 import { DefineBoneJointsStage } from './stages/DefineBoneJointsStage.js';
+import { AutomaticSkinningStage } from './stages/AutomaticSkinningStage.js';
+import { DefineRotationStage } from './stages/DefineRotation.js';
 import { RegenerateModelStage } from './stages/RegenerateModel.js';
 import { RegeneratingModelStage } from './stages/RegeneratingModelStage.js';
 
@@ -40,6 +42,8 @@ class App {
             this.stageManager.registerStage('prompt-input', PromptInputStage);
             this.stageManager.registerStage('generating', GeneratingStage);
             this.stageManager.registerStage('define-bone-joints', DefineBoneJointsStage);
+            this.stageManager.registerStage('automatic-skinning', AutomaticSkinningStage);
+            this.stageManager.registerStage('define-rotation', DefineRotationStage);
             this.stageManager.registerStage('regenerate-model', RegenerateModelStage);
             this.stageManager.registerStage('regenerating-model', RegeneratingModelStage);
 

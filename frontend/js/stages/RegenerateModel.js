@@ -1,6 +1,9 @@
 import { BaseStage } from './BaseStage.js';
 import { appState } from '../state.js';
 import * as THREE from 'three';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 /**
  * RegenerateModelStage - Assign mechanical behavior to selected joints.
@@ -12,10 +15,15 @@ export class RegenerateModelStage extends BaseStage {
         this.mouse = new THREE.Vector2();
         this.handleGroup = new THREE.Group();
         this.handleGroup.name = 'RegenerateJointHandleGroup';
+        this.connectionGroup = new THREE.Group();
+        this.connectionGroup.name = 'RegenerateJointConnectionGroup';
         this.boneHandles = [];
+        this.boneConnections = [];
         this.selectedHandle = null;
         this.handleSyncAnimationId = null;
         this._tempWorldPos = new THREE.Vector3();
+        this._tempParentPos = new THREE.Vector3();
+        this._tempChildPos = new THREE.Vector3();
         this.defaultHandleColor = 0xffa500;
         this.selectedHandleColor = 0x29b6f6;
         this.assignedHandleColor = 0x00c853;
@@ -109,6 +117,7 @@ export class RegenerateModelStage extends BaseStage {
         }
 
         this.clearJointHandles();
+        this.clearJointConnections();
 
         modelRoot.traverse((child) => {
             if (!(child instanceof THREE.Bone)) {
@@ -116,7 +125,7 @@ export class RegenerateModelStage extends BaseStage {
             }
 
             const mesh = new THREE.Mesh(
-                new THREE.SphereGeometry(0.06, 12, 12),
+                new THREE.SphereGeometry(0.035, 12, 12),
                 new THREE.MeshBasicMaterial({ color: this.defaultHandleColor, depthTest: true })
             );
             mesh.userData.isHandle = true;
@@ -126,9 +135,15 @@ export class RegenerateModelStage extends BaseStage {
             this.boneHandles.push(mesh);
             this.handleGroup.add(mesh);
             this.applyHandleColor(mesh);
+
+            const parentBone = child.parent;
+            if (parentBone instanceof THREE.Bone) {
+                this.createJointConnection(parentBone, child);
+            }
         });
 
         this.threeScene.scene.add(this.handleGroup);
+        this.threeScene.scene.add(this.connectionGroup);
     }
 
     /**
@@ -217,6 +232,54 @@ export class RegenerateModelStage extends BaseStage {
     }
 
     /**
+     * Create a visible connection line between parent and child bones.
+     * @param {THREE.Bone} parentBone - Parent bone
+     * @param {THREE.Bone} childBone - Child bone
+     */
+    createJointConnection(parentBone, childBone) {
+        const exists = this.boneConnections.some(
+            (connection) => connection.parentBone === parentBone && connection.childBone === childBone
+        );
+        if (exists) {
+            return;
+        }
+
+        const geometry = new LineGeometry();
+        geometry.setPositions([0, 0, 0, 0, 0, 0]);
+        const rendererEl = this.threeScene?.renderer?.domElement;
+        const material = new LineMaterial({
+            color: 0x66ffcc,
+            linewidth: 6,
+            transparent: true,
+            opacity: 0.9
+        });
+        material.resolution.set(
+            rendererEl?.clientWidth || window.innerWidth,
+            rendererEl?.clientHeight || window.innerHeight
+        );
+
+        const line = new Line2(geometry, material);
+        this.connectionGroup.add(line);
+        this.boneConnections.push({ parentBone, childBone, line });
+        this.updateSingleJointConnection(parentBone, childBone, line);
+    }
+
+    /**
+     * Update line endpoints to match parent/child bone world positions.
+     * @param {THREE.Bone} parentBone - Parent bone
+     * @param {THREE.Bone} childBone - Child bone
+     * @param {Line2} line - Wide line object
+     */
+    updateSingleJointConnection(parentBone, childBone, line) {
+        parentBone.getWorldPosition(this._tempParentPos);
+        childBone.getWorldPosition(this._tempChildPos);
+        line.geometry.setPositions([
+            this._tempParentPos.x, this._tempParentPos.y, this._tempParentPos.z,
+            this._tempChildPos.x, this._tempChildPos.y, this._tempChildPos.z
+        ]);
+    }
+
+    /**
      * Update visual "pressed" state of assignment buttons.
      * The assigned type for the currently selected joint stays highlighted.
      */
@@ -271,6 +334,16 @@ export class RegenerateModelStage extends BaseStage {
             if (!bone) return;
             bone.getWorldPosition(this._tempWorldPos);
             handle.position.copy(this._tempWorldPos);
+        });
+
+        const rendererEl = this.threeScene?.renderer?.domElement;
+        const width = rendererEl?.clientWidth || window.innerWidth;
+        const height = rendererEl?.clientHeight || window.innerHeight;
+        this.boneConnections.forEach(({ parentBone, childBone, line }) => {
+            if (line.material?.resolution) {
+                line.material.resolution.set(width, height);
+            }
+            this.updateSingleJointConnection(parentBone, childBone, line);
         });
     }
 
@@ -331,6 +404,18 @@ export class RegenerateModelStage extends BaseStage {
     }
 
     /**
+     * Dispose and remove all joint connection lines from scene.
+     */
+    clearJointConnections() {
+        this.boneConnections.forEach(({ line }) => {
+            this.connectionGroup.remove(line);
+            if (line.geometry) line.geometry.dispose();
+            if (line.material) line.material.dispose();
+        });
+        this.boneConnections = [];
+    }
+
+    /**
      * Cleanup stage resources.
      */
     destroy() {
@@ -340,8 +425,12 @@ export class RegenerateModelStage extends BaseStage {
         }
         this.setSelectedHandle(null);
         this.clearJointHandles();
+        this.clearJointConnections();
         if (this.handleGroup) {
             this.threeScene?.scene?.remove(this.handleGroup);
+        }
+        if (this.connectionGroup) {
+            this.threeScene?.scene?.remove(this.connectionGroup);
         }
         super.destroy();
     }
